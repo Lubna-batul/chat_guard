@@ -66,26 +66,23 @@ negative_words = [
 ]
 
 def check_intent(text):
+    scores={}
     for intent, keywords in intents.items():
         count=0
     for keyword in keywords:
         if keyword in text:
-            score[intent]=count
+            count+=1
+        scores[intent]=count 
+    best_intent=max(scores,key=scores.get)
+    if scores[best_intent]==0:
+        return "Normal"
+    else:
+        return best_intent
 
 
-                                                                             #Intent : love
+                                                                             #Intent : care
                                                                              ##Sentiment : Positive
                                                                              #Action : KEEP
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -105,4 +102,12 @@ def chech_sentiment(text):
     else:
         print("Sentiment : Neutral ")
 
-                                                                           
+while True:
+    text=input("enter message: ")
+    if text=="exit":
+        print("program ended")
+        break
+    intention=check_intent(text)
+    sentiment=chech_sentiment(text)
+    print("Intent :",intention)
+    print("Sentiment :",sentiment)
