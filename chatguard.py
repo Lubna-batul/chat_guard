@@ -51,18 +51,16 @@ intents={
     "travel", "music", "movie", "game", "work"
 ] 
 }
-positive_words = [
+positive_words =intents["normal_words"]+intents["love_words"]+[
     "happy", "great", "excellent", "amazing", "awesome",
     "fantastic", "wonderful", "brilliant", "good", "success",
     "win", "smile", "kind", "helpful", "respect", "joy",
-    "peace", "hope", "cheerful", "positive"
+    "peace", "hope", "cheerful", "positive","love"
 ]
-
-negative_words = [
-    "sad", "angry", "upset", "depressed", "lonely", "hurt",
+negative_words = intents["spam_words"]+intents["scam_phishing_words"]+intents["profanity_words"]+intents["threat_words"]+intents["hate_words"]+["sad", "angry", "upset", "depressed", "lonely", "hurt",
     "stress", "cry", "pain", "fear", "anxiety", "worried",
     "tired", "broken", "disappointed", "frustrated", "miserable",
-    "guilty", "regret", "failure"
+    "guilty", "regret", "failure","hate","bitchi"
 ]
 
 def check_intent(text):
@@ -72,7 +70,7 @@ def check_intent(text):
     for keyword in keywords:
         if keyword in text:
             count+=1
-        scores[intent]=count 
+    scores[intent]=count 
     best_intent=max(scores,key=scores.get)
     if scores[best_intent]==0:
         return "Normal"
@@ -81,7 +79,13 @@ def check_intent(text):
 
 
                                                                              #Intent : care
-                                                                             ##Sentiment : Positive
+def decision_make(intents):
+    if intents in ["spam_word","scam_phishing_words","threat_word"]:
+        return "Block"
+    elif intents in ["profanity_words","harassment_word"]:
+        return "Review"
+    else:
+        return "Keep"                                                                            ##Sentiment : Positive
                                                                              #Action : KEEP
 
 
@@ -89,18 +93,18 @@ def check_intent(text):
 def chech_sentiment(text):
     positive=0
     negative=0
-    for word in text:
-        if word in positive_words:
+    for word in positive_words:
+        if word in text:
             positive+=1
-    for word in text:
-        if word in negative_words:
+    for word in negative_words:
+        if word in text:
             negative+=1
     if positive >negative:
-        print("Sentiment : Positive")
+        return "positive"
     elif positive< negative:
-        print("Sentiment : Negative")
+        return "negative"
     else:
-        print("Sentiment : Neutral ")
+        return "netural"
 
 while True:
     text=input("enter message: ")
@@ -109,5 +113,8 @@ while True:
         break
     intention=check_intent(text)
     sentiment=chech_sentiment(text)
+    decision=decision_make(text)
+
     print("Intent :",intention)
     print("Sentiment :",sentiment)
+    print("Decision :", decision)
