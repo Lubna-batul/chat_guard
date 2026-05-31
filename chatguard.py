@@ -80,9 +80,9 @@ def check_intent(text):
 
                                                                              #Intent : care
 def decision_make(intents):
-    if intents in ["spam_word","scam_phishing_words","threat_word"]:
+    if intents in ["spam_word","scam_phishing_words","threat_word"]+intents["negative_words"]:
         return "Block"
-    elif intents in ["profanity_words","harassment_word"]:
+    elif intents in ["profanity_words","harassment_word"]+intents["negative_words"]:
         return "Review"
     else:
         return "Keep"                                                                            ##Sentiment : Positive
@@ -113,7 +113,7 @@ while True:
         break
     intention=check_intent(text)
     sentiment=chech_sentiment(text)
-    decision=decision_make(text)
+    decision=decision_make(intents)
 
     print("Intent :",intention)
     print("Sentiment :",sentiment)
