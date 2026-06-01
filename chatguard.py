@@ -14,7 +14,7 @@ intents={
 "hate_words":[
     "racist", "bigot", "supremacy", "inferior", "discrimination",
     "extremist", "segregation", "genocide", "hate", "hatred",
-    "prejudice", "intolerance", "hostility", "bias", "oppression"
+    "prejudice", "intolerance", "hostility", "bias", "oppression","hate"
 ],
 "threat_words": [
     "kill", "murder", "attack", "destroy", "harm", "shoot",
@@ -67,11 +67,12 @@ def check_intent(text):
     scores={}
     for intent, keywords in intents.items():
         count=0
-    for keyword in keywords:
-        if keyword in text:
-            count+=1
-    scores[intent]=count 
+        for keyword in keywords:
+            if keyword in text:
+                count+=1
+        scores[intent]=count 
     best_intent=max(scores,key=scores.get)
+
     if scores[best_intent]==0:
         return "Normal"
     else:
@@ -80,12 +81,19 @@ def check_intent(text):
 
                                                                              #Intent : care
 def decision_make(intents):
-    if intents in ["spam_word","scam_phishing_words","threat_word"]+intents["negative_words"]:
+    if intents in ["spam_word","scam_phishing_words","threat_word"]:
         return "Block"
-    elif intents in ["profanity_words","harassment_word"]+intents["negative_words"]:
+    elif intents=="hate_words":
+        if sentiment.lower()=="negative":
+            return "Block"
+        else:
+            return "Review"
+    elif intents in ["profanity_words","harassment_word","negative_words","hate_words"]:
+        return "Review"
+    elif intents=="help_request_words":
         return "Review"
     else:
-        return "Keep"                                                                            ##Sentiment : Positive
+        return "Keep"                                                                         ##Sentiment : Positive
                                                                              #Action : KEEP
 
 
