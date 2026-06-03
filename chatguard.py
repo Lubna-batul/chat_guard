@@ -16,6 +16,9 @@ intents={
     "extremist", "segregation", "genocide", "hate", "hatred",
     "prejudice", "intolerance", "hostility", "bias", "oppression","hate"
 ],
+"creepy_words": [
+    "send pics","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes"
+],
 "threat_words": [
     "kill", "murder", "attack", "destroy", "harm", "shoot",
     "stab", "bomb", "revenge", "threat", "hunt", "assault",
@@ -57,7 +60,7 @@ positive_words =intents["normal_words"]+intents["love_words"]+[
     "win", "smile", "kind", "helpful", "respect", "joy",
     "peace", "hope", "cheerful", "positive","love"
 ]
-negative_words = intents["spam_words"]+intents["scam_phishing_words"]+intents["profanity_words"]+intents["threat_words"]+intents["hate_words"]+["sad", "angry", "upset", "depressed", "lonely", "hurt",
+negative_words = intents["spam_words"]+intents["scam_phishing_words"]+intents["profanity_words"]+intents["threat_words"]+intents["hate_words"]+intents["creepy_words"]+["sad", "angry", "upset", "depressed", "lonely", "hurt",
     "stress", "cry", "pain", "fear", "anxiety", "worried",
     "tired", "broken", "disappointed", "frustrated", "miserable",
     "guilty", "regret", "failure","hate","bitchi"
@@ -75,25 +78,22 @@ def check_intent(text):
 
     if scores[best_intent]==0:
         return "Normal"
-    else:
-        return best_intent
+    return best_intent
 
 
                                                                              #Intent : care
-def decision_make(intents):
-    if intents in ["spam_word","scam_phishing_words","threat_word"]:
+def decision_make(intents,sentiment):
+    if intents in ["spam_words","scam_phishing_words","threat_words"]:
         return "Block"
-    elif intents=="hate_words":
-        if sentiment.lower()=="negative":
-            return "Block"
-        else:
-            return "Review"
-    elif intents in ["profanity_words","harassment_word","negative_words","hate_words"]:
+    elif intents in ["hate_words","creepy_words"]:
         return "Review"
+    elif intents in ["profanity_words","harassment_word","negative_words","hate_words"]:
+        return "Block"
     elif intents=="help_request_words":
         return "Review"
-    else:
-        return "Keep"                                                                         ##Sentiment : Positive
+    elif intents in ["normal_words","love_words"]:
+        return "Keep"  
+    return "Keep"                                                                       ##Sentiment : Positive
                                                                              #Action : KEEP
 
 
@@ -111,18 +111,17 @@ def chech_sentiment(text):
         return "positive"
     elif positive< negative:
         return "negative"
-    else:
-        return "netural"
+    return "netural"
 
 while True:
-    text=input("enter message: ")
+    text=input("enter message: ").lower()
     if text=="exit":
         print("program ended")
         break
-    intention=check_intent(text)
+    intent=check_intent(text)
     sentiment=chech_sentiment(text)
-    decision=decision_make(intents)
+    decision=decision_make(intent,sentiment)
 
-    print("Intent :",intention)
+    print("Intent :",intent)
     print("Sentiment :",sentiment)
     print("Decision :", decision)
