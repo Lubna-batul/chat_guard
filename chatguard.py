@@ -17,7 +17,7 @@ intents={
     "prejudice", "intolerance", "hostility", "bias", "oppression","hate"
 ],
 "creepy_words": [
-    "send pics","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes","alone","video call","meet alone"
+    "send your pics","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes","alone","video call","meet alone"
 ],
 "threat_words": [
     "kill", "murder","regret", "attack", "destroy", "harm", "shoot",
@@ -62,9 +62,47 @@ positive_words =intents["normal_words"]+intents["love_words"]+[
 ]
 negative_words = intents["spam_words"]+intents["scam_phishing_words"]+intents["profanity_words"]+intents["threat_words"]+intents["hate_words"]+intents["creepy_words"]+["sad", "angry", "upset", "depressed", "lonely", "hurt",
     "stress", "cry", "pain", "fear", "anxiety", "worried",
-    "tired", "broken", "disappointed", "frustrated", "miserable",
-    "guilty", "regret", "failure","hate","bitchi"
+    "tired", "broken","loser", "disappointed", "frustrated", "miserable",
+    "guilty","wtf", "regret", "photo","failure","hate","bitchi","idiot"
 ]
+
+def normalize_text(text):
+    text=text.lower()
+    replacements = {
+        "@": "a",
+        "8": "a",
+        "4": "a",
+        "8": "b",
+        "(": "c",
+        "<": "c",
+        "3": "e",
+        "6": "g",
+        "9": "g",
+        "!": "i",
+        "1": "i",
+        "|": "i",
+        "0": "o",
+        "$": "s",
+        "5": "s",
+        "7": "t",
+        "+": "t",
+        "2": "z",
+        "*":"u",
+        "*": "x",
+        "*": "s",
+        "*":"a"
+                }
+    result=""
+    for ch in text:
+        result+=replacements.get(ch,ch)
+    return result
+
+def clean_text(text):
+    result=""
+    for ch in text:
+        if ch.isalpha() or ch.isspace():
+            result+=ch
+    return result
 
 def check_intent(text):
     scores={}
@@ -77,7 +115,7 @@ def check_intent(text):
     best_intent=max(scores,key=scores.get)
 
     if scores[best_intent]==0:
-        return "Normal"
+        return "Normal_words"
     return best_intent
 
                                                                              #Intent : care                                                                  ##Sentiment : Positive
@@ -94,9 +132,9 @@ def chech_sentiment(text):
             negative+=1
     if positive >negative:
         return "positive"
-    elif positive< negative:
+    elif negative > positive:
         return "negative"
-    return "netural"
+    return "neutral"
 
 def decision_make(intent,sentiment):
     
@@ -117,7 +155,10 @@ def decision_make(intent,sentiment):
 
 
 while True:
-    text=input("enter message: ").lower()
+    text=input("enter message: ")
+    text=normalize_text(text)
+    text=clean_text(text)
+    
     if text=="exit":
         print("program ended")
         break
