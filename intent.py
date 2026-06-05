@@ -1,7 +1,7 @@
 
 posi_intent_words={
     "positive":[
-    "love","care","help","support","guide","assist","teach","learn","share","thank",
+    "love","care","help","support","guide","assist","teach","learn","thank",
     "thanks","appreciate","respect","trust","welcome","friend","kind","kindness","happy","joy",
     "smile","peace","hope","encourage","motivate","inspire","understand","listen","cooperate","collaborate",
     "teamwork","honest","honesty","loyal","loyalty","adore","cherish","comfort","protect","encouragement",
@@ -38,8 +38,8 @@ def positive_intent(text):
     for intent, keywords in posi_intent_words.items():
         count=0
         for keyword in keywords:
-            if keyword in text:
-                count+=1
+          if f" {keyword} " in f" {text} ":
+            count += 1
         scores[intent]=count 
     best_intent=max(scores,key=scores.get)
 
@@ -55,7 +55,7 @@ negative_intent_words = {
     "racist","bigot","supremacy","inferior","discrimination","prejudice","hostility","bias","oppression","genocide",
     "idiot","stupid","loser","moron","worthless","pathetic","dumb","fool","jerk","clown",
     "garbage","trash","useless","failure","ugly","crazy","weirdo","lame","nonsense","scumbag",
-    "asshole","bastard","douche","wtf","bullshit","damn","hell","crap","freak","hateyou",
+    "asshole","bastard","douche","wtf","bullshit","damn","hell","crap","freak","hateyou","meet","tonight"
     "scam","fraud","cheat","steal","theft","phishing","otp","password","cvv","credential",
     "hack","hacker","malware","virus","exploit","blackmail","extort","manipulate","deceive","fake",
     "nude","nudes","creepy","stalker","harass","harassment","abuse","abusive","toxic","toxicity",
@@ -72,15 +72,15 @@ negative_intent_words = {
     "free", "offer", "discount", "winner", "lottery", "bonus",
     "cash", "reward", "claim", "prize", "earn", "income",
     "profit", "investment", "crypto", "click", "subscribe",
-    "promotion", "limited", "deal","buy"
+    "promotion", "limited", "deal","buy","scam"
 ],
 "hate_words":[
-    "racist", "never","bigot", "supremacy", "inferior", "discrimination",
+    "racist", "never","bigot", "idiot","supremacy", "inferior", "discrimination",
     "extremist", "segregation", "genocide", "hate", "hatred","despise ",
     "prejudice", "intolerance", "hostility", "bias", "oppression","hate"
 ],
 "creepy_words": [
-    "send your pics","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes","alone","video call","meet alone"
+    "send pics","pic","pics","image","send","share","upload","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes","alone","video call","meet alone"
 ],
 "threat_words": [
     "kill", "murder","regret", "attack", "destroy", "harm", "shoot",
@@ -103,14 +103,49 @@ def negative_intent(text):
     for intent, keywords in negative_intent_words.items():
         count=0
         for keyword in keywords:
-            if keyword in text:
-                count+=1
+            if f" {keyword} " in f" {text} ":
+                count += 1
         scores[intent]=count 
     best_intent=max(scores,key=scores.get)
 
     if scores[best_intent]==0:
         return "Normal_words"
     return best_intent
+    
+def positive_sentiment(text):
+    positive=0
+    for word in posi_intent_words:
+        if f" {word} " in f" {text} ":
+            positive += 1
+    return positive
+
+
+def negative_sentiment(text):
+    negative=0
+    for word in negative_intent_words:
+        if f" {word} " in f" {text} ":
+            negative+= 1
+    return negative
+
+
+def sentiment_check(text):
+    positive=positive_sentiment(text)
+    negative=negative_sentiment(text)
+    
+    if positive>negative:
+        return "Positive"
+    elif negative>positive:
+        return "Negative"
+    else:
+        return "Neutral"
+
+def decision_make(positive_intent,negative_intent,sentiment):
+    # +intent and + sentiment
+    if positive_intent !="Normal_words" and negative_intent == "Normal_words" and sentiment=="Positive":
+        return "Keep"
+    # - intent and - sentiment
+    if negative_intent !="Normal_words" and sentiment!="Negative":
+        return "Block"
     
 
 
@@ -152,7 +187,12 @@ def normalize_text(text):
 
 while True:
     text=input("enter message: ")
+    text=normalize_text(text)
     good_intent=positive_intent(text)
     bad_intent=negative_intent(text)
+    sentiment=sentiment_check(text)
+    decision=decision_make(positive_intent, negative_intent, sentiment)
     print("positive intent:",good_intent)
     print("Negative intent:",bad_intent)
+    print(sentiment)
+    print(decision)
