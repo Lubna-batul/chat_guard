@@ -56,7 +56,7 @@ negative_intent_words = {
     "idiot","stupid","loser","moron","worthless","pathetic","dumb","fool","jerk","clown",
     "garbage","trash","useless","failure","ugly","crazy","weirdo","lame","nonsense","scumbag",
     "asshole","bastard","douche","wtf","bullshit","damn","hell","crap","freak","hateyou","meet","tonight"
-    "scam","fraud","cheat","steal","theft","phishing","otp","password","cvv","credential",
+    "scam","ruining","ruin","fraud","cheat","steal","theft","phishing","otp","password","cvv","credential",
     "hack","hacker","malware","virus","exploit","blackmail","extort","manipulate","deceive","fake",
     "nude","nudes","creepy","stalker","harass","harassment","abuse","abusive","toxic","toxicity",
     "regret","guilty","miserable","frustrated","broken","lonely","fear","anxiety","worried","stress",
@@ -109,7 +109,7 @@ def negative_intent(text):
     best_intent=max(scores,key=scores.get)
 
     if scores[best_intent]==0:
-        return "Normal_words"
+        return "No"
     return best_intent
     
 def positive_sentiment(text):
@@ -144,8 +144,16 @@ def decision_make(positive_intent,negative_intent,sentiment):
     if positive_intent !="Normal_words" and negative_intent == "Normal_words" and sentiment=="Positive":
         return "Keep"
     # - intent and - sentiment
-    if negative_intent !="Normal_words" and sentiment!="Negative":
+    if negative_intent !="Normal_words" and sentiment=="Negative":
         return "Block"
+    # - intent and + sentiment
+    if negative_intent !="Normal_words" and sentiment=="Positive":
+        return "Review"
+    # + intent and - sentiment 
+    if positive_intent!="Normal_words" and sentiment=="Negative":
+        return "Keep"
+    if positive_intent!="Normal_words" and sentiment=="Neutral":
+        return "Keep"
     
 
 
@@ -194,5 +202,5 @@ while True:
     decision=decision_make(positive_intent, negative_intent, sentiment)
     print("positive intent:",good_intent)
     print("Negative intent:",bad_intent)
-    print(sentiment)
-    print(decision)
+    print("Sentiment:",sentiment)
+    print("Decision:",decision)
