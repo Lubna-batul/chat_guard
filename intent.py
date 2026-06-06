@@ -1,7 +1,7 @@
 
 posi_intent_words={
     "positive":[
-    "love","care","help","support","guide","assist","teach","learn","thank",
+    "care","help","support","guide","assist","teach","learn","thank",
     "thanks","appreciate","respect","trust","welcome","friend","kind","kindness","happy","joy",
     "smile","peace","hope","encourage","motivate","inspire","understand","listen","cooperate","collaborate",
     "teamwork","honest","honesty","loyal","loyalty","adore","cherish","comfort","protect","encouragement",
@@ -9,14 +9,27 @@ posi_intent_words={
     "successful","achievement","achieve","win","winner","progress","improve","improvement","growth","opportunity",
     "solution","solve","recommend","suggest","advice","clarify","explain","information","knowledge","education",
     "study","book","family","friendship","community","generous","gratitude","cheerful","delight","optimistic",
-    "polite","courteous","gentle","lovely","beautiful","cute","sweet","dear","darling","heart",
-    "affection","romance","beloved","soulmate","hug","kiss","blessing","faith","patience","forgive",
+    "polite","courteous","gentle","lovely","beautiful","cute","sweet","dear","heart",
+    "affection","beloved","soulmate","blessing","faith","patience","forgive",
     "forgiveness","safe","security","trustworthy","valuable","creative","innovation","productive","productive"
 ],
+"care_words": [
+    "care", "caring", "support", "protect", "comfort", "encourage",
+    "understand", "listen", "help", "assist", "guide", "advice",
+    "concern", "worry", "check", "safe", "stay safe", "take care",
+    "be careful", "rest", "sleep well", "eat well", "drink water",
+    "get well soon", "recover", "healing", "hope", "trust", "respect",
+    "kind", "kindness", "gentle", "patient", "patience", "peace",
+    "calm", "relax", "smile", "cheer up", "happy", "joy",
+    "friend", "friendship", "family", "together", "always here",
+    "here for you", "with you", "believe in you", "proud of you",
+    "stay strong", "don't worry", "everything will be okay",
+    "take care of yourself", "miss you", "thinking of you"
+],
 "love_words": [
-    "love", "darling", "sweetheart", "honey", "baby", "dear",
+    "love","sweetheart", "dear",
     "beloved", "adore", "care", "kiss", "romance", "crush",
-    "soulmate", "affection", "lovely", "beautiful", "cute",
+    "soulmate", "affection", "lovely", "beautiful",
     "angel", "heart", "forever"
 ],
 "help_request_words":[
@@ -27,7 +40,7 @@ posi_intent_words={
 ],
 
 "normal_words": [
-    "hello", "hi", "thanks", "welcome", "morning",
+    "hello","thanks", "welcome", "morning",
     "evening", "friend", "family", "school", "college",
     "study", "book", "computer", "food", "water",
     "travel", "music", "movie", "game", "work"
@@ -75,12 +88,12 @@ negative_intent_words = {
     "promotion", "limited", "deal","buy","scam"
 ],
 "hate_words":[
-    "racist", "never","bigot", "idiot","supremacy", "inferior", "discrimination",
+    "racist","fuck", "never","bigot", "idiot","supremacy", "inferior", "discrimination",
     "extremist", "segregation", "genocide", "hate", "hatred","despise ",
     "prejudice", "intolerance", "hostility", "bias", "oppression","hate"
 ],
 "creepy_words": [
-    "send pics","pic","pics","image","send","share","upload","baby","bby","send me pics","send photo","send me photo","send image","nude","nudes","alone","video call","meet alone"
+    "baby","come","kiss","show","hug","myplace","bby","babe","cutie","sweetheart","darling","dear","honey","princess","beautiful","gorgeous","sexy","hot","cute","angel","love","kiss","hug","romance","crush","date","girlfriend","boyfriend","wife","husband","alone","private","secret","meet","meet alone","video call","voice call","late night","midnight","pics","pic","photo","image","selfie","send pics","send me pics","send photo","send image","nude","nudes","lingerie","bedroom","cuddle","touch","massage"
 ],
 "threat_words": [
     "kill", "murder","regret", "attack", "destroy", "harm", "shoot",
@@ -109,22 +122,24 @@ def negative_intent(text):
     best_intent=max(scores,key=scores.get)
 
     if scores[best_intent]==0:
-        return "No"
+        return "Normal_words"
     return best_intent
     
 def positive_sentiment(text):
     positive=0
-    for word in posi_intent_words:
-        if f" {word} " in f" {text} ":
-            positive += 1
+    for words in posi_intent_words.values():
+        for word in words:
+            if f" {word} " in f" {text} ":
+                positive += 1
     return positive
 
 
 def negative_sentiment(text):
     negative=0
-    for word in negative_intent_words:
-        if f" {word} " in f" {text} ":
-            negative+= 1
+    for words in negative_intent_words.values():
+        for word in words:
+            if f" {word} " in f" {text} ":
+                negative+= 1
     return negative
 
 
@@ -139,33 +154,28 @@ def sentiment_check(text):
     else:
         return "Neutral"
 
-def decision_make(positive_intent,negative_intent,sentiment):
+def decision_make(bad_intent,good_intent,sentiment):
     # +intent and + sentiment
-    if positive_intent !="Normal_words" and negative_intent == "Normal_words" and sentiment=="Positive":
+    if good_intent !="Normal_words" and bad_intent == "Normal_words" and sentiment=="Positive":
         return "Keep"
     # - intent and - sentiment
-    if negative_intent !="Normal_words" and sentiment=="Negative":
+    if bad_intent !="Normal_words" and sentiment=="Negative":
         return "Block"
     # - intent and + sentiment
-    if negative_intent !="Normal_words" and sentiment=="Positive":
-        return "Review"
+    if bad_intent !="Normal_words" and sentiment=="Positive":
+        return "Block"
     # + intent and - sentiment 
-    if positive_intent!="Normal_words" and sentiment=="Negative":
+    if good_intent!="Normal_words" and sentiment=="Negative":
+        return "Review"
+    # neutral
+    if good_intent!="Normal_words" and sentiment=="Neutral":
         return "Keep"
-    if positive_intent!="Normal_words" and sentiment=="Neutral":
-        return "Keep"
-    
-
-
-
-
-
-
-
-
-
-
-
+    # + intent and neutral sentiment
+    if bad_intent!="Normal_words" and sentiment=="Neutral":
+        return "Block"
+    if bad_intent!="Normal_words":
+        return "Block"
+    return "Keep"
 def normalize_text(text):
     text=text.lower()
     replacements ={
@@ -199,8 +209,13 @@ while True:
     good_intent=positive_intent(text)
     bad_intent=negative_intent(text)
     sentiment=sentiment_check(text)
-    decision=decision_make(positive_intent, negative_intent, sentiment)
-    print("positive intent:",good_intent)
-    print("Negative intent:",bad_intent)
+    decision=decision_make(bad_intent,good_intent, sentiment)
+    if good_intent!="Normal_words":
+        final_intent=good_intent
+    elif bad_intent!="Normal_words":
+        final_intent=bad_intent
+    else:
+        final_intent="Noram_words"
+    print("Intent:",final_intent)
     print("Sentiment:",sentiment)
     print("Decision:",decision)
